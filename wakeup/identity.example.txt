@@ -1,0 +1,3 @@
+User: Jane Doe (jane@example.com). Role: founder of ExampleCorp (embedded systems).
+Preferred language: English. Style: concise answers, no filler.
+Memory: memory-vault (Postgres+pgvector, MCP tools recall/remember/forget/memory_status). Vault = source of truth.

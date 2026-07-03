@@ -1,0 +1,11 @@
+.env
+.venv/
+shim/.venv/
+__pycache__/
+*.pyc
+*.sql.gz
+backup.log
+wakeup/identity.txt
+wakeup/wakeup_snapshot.txt
+backup/*.plist
+.DS_Store
