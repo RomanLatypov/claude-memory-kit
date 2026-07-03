@@ -90,6 +90,16 @@ launchctl load ~/Library/LaunchAgents/com.user.vault-tunnel.plist
 
 Your public base URL is now `https://vault.example.com`.
 
+> **QUIC gotcha:** on networks that block UDP 7844 (phone hotspots, some office
+> firewalls) the tunnel connects but Cloudflare returns error 1033/530. Fix:
+> run cloudflared with `--protocol http2` (TCP 443).
+
+> **No browser login needed:** if you have a Cloudflare API token/Global Key,
+> the whole tunnel (create → ingress → DNS → tunnel token) can be driven via
+> the CF API (`/accounts/{id}/cfd_tunnel`), then `cloudflared tunnel run
+> --token-file ...`. The launchd plist in this folder reads the token from
+> `~/.cloudflared/` so the secret never sits inside the plist.
+
 ### Option B — No domain (quick tunnel)
 
 ```bash

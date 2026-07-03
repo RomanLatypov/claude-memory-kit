@@ -9,6 +9,7 @@ info:
 
 servers:
   # Replace with the public HTTPS hostname of your tunnel (see README.md).
+  # e.g. - url: https://vault.example.com
   - url: https://YOUR-VAULT-HOSTNAME
 
 security:
