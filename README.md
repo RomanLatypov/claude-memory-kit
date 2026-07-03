@@ -50,6 +50,26 @@ Then:
 
 To store something: just tell Claude *"remember that ..."* — it calls the `remember` tool. Retrieval happens automatically via `recall` whenever the context calls for it.
 
+## What Claude sees at session start
+
+Real output of the wake-up hook (from the installer's e2e test):
+
+```
+User: Jane Doe (jane@example.com). Role: founder of ExampleCorp (embedded systems).
+Preferred language: English. Style: concise answers, no filler.
+Memory: memory-vault (Postgres+pgvector, MCP tools recall/remember/forget/memory_status). Vault = source of truth.
+
+## Facts from memory-vault (most recent)
+  - Test fact: the kit installer works end to end.
+
+(Full memory via MCP tools: recall / remember. Vault = source of truth.)
+```
+
+The whole pipeline — `install.sh` on a clean copy, token creation, shim MCP
+handshake, `remember` → `recall` round-trip, wake-up output, offline fallback —
+is exercised end-to-end before every release (flags `MK_NO_MCP=1
+MK_NO_SCHEDULE=1` exist exactly for that).
+
 ## Configuration
 
 Everything lives in `.env` (created by the installer, never committed):

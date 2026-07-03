@@ -4,6 +4,10 @@
 # venv, and wires everything into Claude Code (MCP server + wake-up hook).
 #
 # Safe to re-run: every step is idempotent.
+#
+# Flags (env):
+#   MK_NO_MCP=1       skip Claude Code MCP registration (print the JSON instead)
+#   MK_NO_SCHEDULE=1  skip the launchd/cron backup schedule step
 set -euo pipefail
 
 KIT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -88,7 +92,10 @@ MCP_JSON=$(cat <<EOF
 {"type":"stdio","command":"$KIT_DIR/shim/.venv/bin/python","args":["$KIT_DIR/shim/shim.py"],"env":{"MV_URL":"${MV_URL:-http://localhost:${MV_PORT:-8000}}","MV_TOKEN":"$MV_TOKEN"}}
 EOF
 )
-if command -v claude >/dev/null 2>&1; then
+if [ -n "${MK_NO_MCP:-}" ]; then
+  say "MK_NO_MCP set — add this to ~/.claude.json under mcpServers manually:"
+  echo "\"memory-vault\": $MCP_JSON"
+elif command -v claude >/dev/null 2>&1; then
   say "registering the MCP server with Claude Code (user scope)"
   claude mcp remove memory-vault -s user >/dev/null 2>&1 || true
   claude mcp add-json memory-vault "$MCP_JSON" -s user \
@@ -100,7 +107,9 @@ else
 fi
 
 # ---------------------------------------------------------------- 7. daily backup (macOS launchd)
-if [ "$(uname)" = "Darwin" ]; then
+if [ -n "${MK_NO_SCHEDULE:-}" ]; then
+  say "MK_NO_SCHEDULE set — skipping the backup schedule step"
+elif [ "$(uname)" = "Darwin" ]; then
   PLIST=~/Library/LaunchAgents/com.memorykit.backup.plist
   sed "s|__KIT_DIR__|$KIT_DIR|g" backup/com.memorykit.backup.plist.template > "$PLIST"
   launchctl unload "$PLIST" 2>/dev/null || true
