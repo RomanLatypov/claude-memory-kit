@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Keeps the Cloudflare tunnel to the vault running across logins/reboots.
+  EDIT before use:
+    - the cloudflared path (find yours with: which cloudflared)
+    - the --config path
+    - the tunnel name at the end (here: vault)
+    - the log paths
+  Install:
+    cp com.user.vault-tunnel.plist ~/Library/LaunchAgents/
+    launchctl load ~/Library/LaunchAgents/com.user.vault-tunnel.plist
+  Uninstall / turn the bridge off:
+    launchctl unload ~/Library/LaunchAgents/com.user.vault-tunnel.plist
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.user.vault-tunnel</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/homebrew/bin/cloudflared</string>
+        <string>tunnel</string>
+        <string>--config</string>
+        <string>/Users/YOU/.cloudflared/vault-config.yml</string>
+        <string>run</string>
+        <string>vault</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/YOU/.cloudflared/vault-tunnel.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/YOU/.cloudflared/vault-tunnel.err.log</string>
+</dict>
+</plist>

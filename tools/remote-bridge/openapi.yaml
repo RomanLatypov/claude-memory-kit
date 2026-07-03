@@ -1,0 +1,177 @@
+openapi: 3.1.0
+info:
+  title: Memory Vault — Remote Bridge
+  description: >
+    Read and write your self-hosted Memory Vault from an external AI client
+    (e.g. a ChatGPT Custom GPT Action). Backed by the memory-vault REST API;
+    every request is authenticated with a Bearer token.
+  version: "1.0.0"
+
+servers:
+  # Replace with the public HTTPS hostname of your tunnel (see README.md).
+  - url: https://YOUR-VAULT-HOSTNAME
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/search:
+    post:
+      operationId: recallMemory
+      summary: Search the vault for relevant memories (recall).
+      description: >
+        Hybrid semantic + keyword search over stored memories. Call this
+        whenever you need context about the user, their projects, past
+        decisions, or anything they asked you to remember.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchRequest'
+      responses:
+        '200':
+          description: Ranked search hits.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchResponse'
+        '401':
+          description: Missing or invalid Bearer token.
+
+  /api/ingest/text:
+    post:
+      operationId: rememberMemory
+      summary: Store a new memory (remember).
+      description: >
+        Persist a fact, decision, or note into the vault so it can be recalled
+        later. Use this when the user says "remember X" or when a durable fact
+        emerges that is worth keeping across sessions. Writes go to the
+        "default" space unless another space is given.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IngestTextRequest'
+      responses:
+        '200':
+          description: Storage result.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IngestResponse'
+        '401':
+          description: Missing or invalid Bearer token.
+
+  /api/chunks/{chunk_id}:
+    delete:
+      operationId: forgetMemory
+      summary: Delete a stored memory by id (forget).
+      description: >
+        Permanently remove a single memory chunk. Obtain the chunk_id from a
+        prior recallMemory result. Use only when the user explicitly asks to
+        forget or delete something.
+      parameters:
+        - name: chunk_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deletion result.
+        '401':
+          description: Missing or invalid Bearer token.
+        '404':
+          description: No chunk with that id.
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+  schemas:
+    SearchRequest:
+      type: object
+      required: [query]
+      properties:
+        query:
+          type: string
+          minLength: 1
+          maxLength: 8000
+          description: Natural-language search query.
+          example: what do you know about my visa case
+        spaces:
+          type: array
+          items:
+            type: string
+          nullable: true
+          description: Restrict to these spaces. Omit to search all.
+          example: ["default"]
+        since:
+          type: string
+          nullable: true
+          description: ISO date (YYYY-MM-DD); only return memories newer than this.
+          example: "2026-01-01"
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 10
+
+    SearchHit:
+      type: object
+      properties:
+        chunk_id: { type: string }
+        content: { type: string }
+        similarity: { type: number }
+        space: { type: string }
+        speaker: { type: string, nullable: true }
+        source: { type: string, nullable: true }
+        created_at: { type: string, nullable: true }
+        metadata: { type: object, additionalProperties: true }
+
+    SearchResponse:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchHit'
+        total_results: { type: integer }
+        query_variations:
+          type: array
+          items: { type: string }
+        query_time_ms: { type: integer }
+
+    IngestTextRequest:
+      type: object
+      required: [text]
+      properties:
+        text:
+          type: string
+          minLength: 1
+          maxLength: 1000000
+          description: The memory content to store.
+        space:
+          type: string
+          default: default
+          description: Namespace to store under. Leave as "default" for external writes.
+        source:
+          type: string
+          default: chatgpt
+          description: Where this memory came from (used for provenance/filtering).
+        speaker:
+          type: string
+          nullable: true
+          description: Who said it — "human" or "assistant".
+
+    IngestResponse:
+      type: object
+      properties:
+        stored: { type: boolean }
+        chunk_id: { type: string, nullable: true }
+        chunks_created: { type: integer }
+        message: { type: string }

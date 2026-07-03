@@ -104,11 +104,24 @@ your own)? `tools/chroma_export.py` + `tools/vault_loader.py` move it over
 idempotently — safe to re-run, only missing records load. Battle-tested on a
 1,540-record migration. Details and gotchas: [docs/MIGRATION.md](docs/MIGRATION.md).
 
+## Using the vault from ChatGPT (or another external AI)
+
+The vault is Claude-first, but the same memories can be read **and written** from
+a ChatGPT Custom GPT (or any external client) over an authenticated HTTPS tunnel.
+No engine changes — it uses the built-in Bearer auth plus a Cloudflare/ngrok
+tunnel, with a dedicated revocable token so a leak never affects Claude.
+
+Setup (token → tunnel → Custom GPT Action) and a ready OpenAPI schema:
+[tools/remote-bridge/README.md](tools/remote-bridge/README.md).
+
 ## Security notes
 
 - The API requires a Bearer token; the DB password is random per install.
 - Both ports bind to localhost by default. Do not expose them; the memories are plaintext.
 - Backups are unencrypted SQL dumps — treat the backup dir accordingly.
+- The [remote bridge](tools/remote-bridge/README.md) deliberately exposes the API
+  over HTTPS. Use a dedicated token, keep it in a password manager, and add a
+  Cloudflare WAF/rate-limit rule — the token is the only lock.
 
 ## Credits
 
