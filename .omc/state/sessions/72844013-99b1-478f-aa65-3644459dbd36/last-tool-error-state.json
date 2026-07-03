@@ -1,0 +1,7 @@
+{
+  "tool_name": "mcp__claude-in-chrome__form_input",
+  "tool_input_preview": "{\"ref\":\"ref_7\",\"tabId\":1055080781,\"value\":\"For the past two weeks my Claude Code has been waking up every session already knowing who I am, what projects are in flight, and what we decided yesterday. ...",
+  "error": "Element type \"DIV\" is not a supported form input",
+  "timestamp": "2026-07-03T12:39:53.368Z",
+  "retry_count": 1
+}

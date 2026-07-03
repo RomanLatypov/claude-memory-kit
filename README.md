@@ -48,6 +48,10 @@ Then:
 2. Add the SessionStart hook to `~/.claude/settings.json` (the installer prints the exact snippet).
 3. Restart Claude Code and ask: *"what do you remember about me?"*
 
+The installer also registers the shim with the **Claude Desktop app** if it finds
+`claude_desktop_config.json` (backup saved next to it; restart Desktop after).
+One vault, both clients, same memories.
+
 To store something: just tell Claude *"remember that ..."* — it calls the `remember` tool. Retrieval happens automatically via `recall` whenever the context calls for it.
 
 ## What Claude sees at session start

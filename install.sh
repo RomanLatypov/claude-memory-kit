@@ -106,6 +106,26 @@ else
   echo "\"memory-vault\": $MCP_JSON"
 fi
 
+# ---------------------------------------------------------------- 6b. Claude Desktop (optional)
+DESKTOP_CFG="$HOME/Library/Application Support/Claude/claude_desktop_config.json"
+if [ -z "${MK_NO_MCP:-}" ] && [ -f "$DESKTOP_CFG" ]; then
+  say "Claude Desktop detected — registering the shim there too"
+  cp "$DESKTOP_CFG" "$DESKTOP_CFG.bak_memorykit"
+  KIT_DIR="$KIT_DIR" MV_TOKEN="$MV_TOKEN" MV_URL="${MV_URL:-http://localhost:${MV_PORT:-8000}}" \
+  python3 - "$DESKTOP_CFG" <<'PY'
+import json, os, sys
+path = sys.argv[1]
+cfg = json.load(open(path))
+cfg.setdefault("mcpServers", {})["memory-vault"] = {
+    "command": os.environ["KIT_DIR"] + "/shim/.venv/bin/python",
+    "args": [os.environ["KIT_DIR"] + "/shim/shim.py"],
+    "env": {"MV_URL": os.environ["MV_URL"], "MV_TOKEN": os.environ["MV_TOKEN"]},
+}
+json.dump(cfg, open(path, "w"), indent=2)
+print("  claude_desktop_config.json updated (backup: .bak_memorykit); restart Claude Desktop")
+PY
+fi
+
 # ---------------------------------------------------------------- 7. daily backup (macOS launchd)
 if [ -n "${MK_NO_SCHEDULE:-}" ]; then
   say "MK_NO_SCHEDULE set — skipping the backup schedule step"
