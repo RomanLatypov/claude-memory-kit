@@ -21,7 +21,10 @@ services:
       retries: 10
 
   app:
-    image: ghcr.io/mihaibuilds/memory-vault:1.0.1
+    # Default: the upstream memory-vault image (MIT, MihaiBuilds).
+    # To pin your own mirror, set MV_APP_IMAGE in .env
+    # (e.g. MV_APP_IMAGE=ghcr.io/romanlatypov/vault-engine:1.0.1 once pushed).
+    image: ${MV_APP_IMAGE:-ghcr.io/mihaibuilds/memory-vault:1.0.1}
     restart: unless-stopped
     depends_on:
       db:

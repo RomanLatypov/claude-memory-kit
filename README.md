@@ -1,6 +1,6 @@
 # claude-memory-kit
 
-Persistent, self-hosted long-term memory for [Claude Code](https://claude.com/claude-code), built around [memory-vault](https://github.com/MihaiBuilds/memory-vault) (Postgres + pgvector).
+Persistent, self-hosted long-term memory for [Claude Code](https://claude.com/claude-code), built around [vault-engine](https://github.com/RomanLatypov/vault-engine) (Postgres + pgvector).
 
 Claude wakes up every session already knowing who you are and what you were working on. Memories survive restarts, work across all your projects, and never leave your machine.
 
@@ -8,15 +8,15 @@ Claude wakes up every session already knowing who you are and what you were work
 Claude Code ──stdio──> thin MCP shim (~1s start, ~40 MB)
                           │ HTTP + Bearer token
                           ▼
-              memory-vault app container (always warm, embeds + hybrid search)
+              vault-engine app container (always warm, embeds + hybrid search)
                           │
                           ▼
               Postgres + pgvector (docker volume)
 ```
 
-## Why this kit and not just memory-vault?
+## Why this kit and not just the engine?
 
-memory-vault ships a Docker-based MCP server: every Claude window spawns a
+vault-engine ships a Docker-based MCP server: every Claude window spawns a
 container with its own embedding model — ~10s cold start and ~400 MB RAM each,
 and orphaned containers pile up. This kit replaces that with a **thin stdio
 shim** that proxies to the always-warm app container: **~1s start, ~40 MB per
@@ -125,5 +125,5 @@ Setup (token → tunnel → Custom GPT Action) and a ready OpenAPI schema:
 
 ## Credits
 
-- [memory-vault](https://github.com/MihaiBuilds/memory-vault) by MihaiBuilds (MIT) — the storage/search engine this kit orchestrates.
+- [vault-engine](https://github.com/RomanLatypov/vault-engine) — the storage/search engine this kit orchestrates; based on [memory-vault](https://github.com/MihaiBuilds/memory-vault) by MihaiBuilds (MIT).
 - Kit by [Roman Latypov](https://github.com/RomanLatypov). MIT.
