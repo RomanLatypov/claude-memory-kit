@@ -4,6 +4,8 @@ Persistent, self-hosted long-term memory for [Claude Code](https://claude.com/cl
 
 Claude wakes up every session already knowing who you are and what you were working on. Memories survive restarts, work across all your projects, and never leave your machine.
 
+> **Want the memory on a server instead** — shared across all your machines *and* with ChatGPT, reachable from anywhere with zero open ports? That's the sibling kit: [ai-memory-server](https://github.com/RomanLatypov/ai-memory-server). Same engine, same shim — the vault just lives on a $5 VPS.
+
 ```
 Claude Code ──stdio──> thin MCP shim (~1s start, ~40 MB)
                           │ HTTP + Bearer token
@@ -107,7 +109,7 @@ idempotently — safe to re-run, only missing records load. Battle-tested on a
 ## Security notes
 
 - The API requires a Bearer token; the DB password is random per install.
-- Both ports bind to localhost by default. Do not expose them; the memories are plaintext.
+- Both ports bind to localhost by default. Do not expose them; the memories are plaintext. If you want the vault reachable from other machines, don't hand-roll port-forwarding — use [ai-memory-server](https://github.com/RomanLatypov/ai-memory-server), which does the exposure properly (tunnel, TLS, per-client tokens).
 - Backups are unencrypted SQL dumps — treat the backup dir accordingly.
 
 ## Credits
